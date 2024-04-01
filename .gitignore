@@ -21,3 +21,6 @@ config.jsonc
 
 # Go workspace file
 go.work
+
+*.*:Zone.Identifier
+*.*:shield

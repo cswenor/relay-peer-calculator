@@ -74,15 +74,11 @@ func PeersToSlice(peerData PeerData, dates []string) [][]string {
 
 // PeerDataToCSV converts PeerData into a 2D slice of strings in the desired CSV format.
 func PeerDataToCSV(peerData PeerData) [][]string {
-	// Initialize a structure to hold all unique dates and hosts
+	// Initialize a structure to hold all unique dates
 	allDates := make(map[string]bool)
-	allHosts := make([]string, 0, len(peerData)) // Pre-allocate space for hosts
-
-	// Collect all unique dates and hosts from peerData
-	for host, dates := range peerData {
-		allHosts = append(allHosts, host) // Collect hosts
+	for _, dates := range peerData {
 		for date := range dates {
-			allDates[date] = true // Collect unique dates
+			allDates[date] = true
 		}
 	}
 
@@ -93,25 +89,28 @@ func PeerDataToCSV(peerData PeerData) [][]string {
 	}
 	sort.Strings(sortedDates) // Sort the dates in ascending order
 
-	sort.Strings(allHosts) // Sort the hosts for consistent ordering
-
 	// Prepare the 2D slice for the CSV output
-	output := make([][]string, 0, len(sortedDates)+1)
-	header := append([]string{"Date"}, allHosts...) // Create the header
-	output = append(output, header)
+	output := make([][]string, 1+len(peerData)) // Allocate space for header plus each host
+	header := make([]string, 1, len(sortedDates)+1)
+	header[0] = "Relay/Date"                // First cell is the label for the relay column
+	header = append(header, sortedDates...) // Append all sorted dates to the header
+	output[0] = header                      // Set the header as the first row
 
-	// Create each row for the dates
-	for _, date := range sortedDates {
-		row := []string{date} // Start with the date
-		for _, host := range allHosts {
-			peers, ok := peerData[host][date]
-			if !ok {
-				peers = "0" // If no data for this host on this date, use "0"
+	i := 1 // Start filling from the second row
+	for host, dates := range peerData {
+		row := make([]string, len(sortedDates)+1) // +1 for the host label
+		row[0] = host                             // Set host name as the first column
+		for j, date := range sortedDates {
+			if val, ok := dates[date]; ok {
+				row[j+1] = val // +1 because the first column is the host name
+			} else {
+				row[j+1] = "0" // Fill with "0" if no data for this date
 			}
-			row = append(row, peers)
 		}
-		output = append(output, row) // Add the row to the output
+		output[i] = row
+		i++
 	}
+
 	return output
 }
 

@@ -50,7 +50,7 @@ func main() {
 		}
 	}
 
-	monthToFilter := "2023-12" // Specify the month you want to filter by
+	monthToFilter := "2024-02" // Specify the month you want to filter by
 
 	// Filter the processed peers data to include only data for the specified month
 	filteredPeers := processor.FilterDataByMonth(processedPeers, monthToFilter)
